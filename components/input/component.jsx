@@ -1,84 +1,119 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { applyVariations, forwardClassRef } from '../utils';
-import * as Styled from './styled';
+import styled from 'styled-components';
+import { resetStyles } from '../utils';
+import { thickness, fonts, inputColors, colors } from '../shared-styles';
 
 /** Standard text input with no validation */
-export const Input = forwardClassRef(
-	class Input extends PureComponent {
-		static propTypes = {
-			value: PropTypes.string,
-			placeholder: PropTypes.string,
-			type: PropTypes.string,
-			readOnly: PropTypes.bool,
-			autoFocus: PropTypes.bool,
-			disabled: PropTypes.bool,
-			onChange: PropTypes.func,
-			onClick: PropTypes.func,
-			onEnter: PropTypes.func,
-			/** Medium variation */
-			medium: PropTypes.bool,
-			/** Small variation */
-			small: PropTypes.bool,
-			/** Large variation */
-			large: PropTypes.bool,
-			styleOverrides: PropTypes.shape({
-				width: PropTypes.string,
-			}),
-		};
+export class Input extends PureComponent {
+	static small = 'small';
+	static medium = 'medium';
+	static large = 'large';
 
-		static defaultProps = {
-			styleOverrides: {},
-		};
+	static Small = props => <Input {...props} size={Input.small} />;
+	static Medium = props => <Input {...props} size={Input.medium} />;
+	static Large = props => <Input {...props} size={Input.large} />;
 
-		handleChange = () => {
-			const { onChange } = this.props;
-			if (onChange) {
-				onChange();
-			}
-		};
+	static propTypes = {
+		value: PropTypes.string,
+		placeholder: PropTypes.string,
+		type: PropTypes.string,
+		onChange: PropTypes.func,
+		onClick: PropTypes.func,
+		onKeyPress: PropTypes.func,
+		size: PropTypes.oneOf([Input.small, Input.medium, Input.large]),
+		styleOverrides: PropTypes.shape({
+			width: PropTypes.string,
+		}),
+	};
 
-		handleKeyPress = e => {
-			const { onEnter } = this.props;
-			if (onEnter && e.key === 'Enter') {
-				onEnter();
-			}
-		};
+	static defaultProps = {
+		styleOverrides: {},
+		size: Input.medium,
+	};
 
-		render() {
-			const {
-				value,
-				placeholder,
-				readOnly,
-				type,
-				autoFocus,
-				onClick,
-				disabled,
-				forwardedRef, // eslint-disable-line react/prop-types
-				...inputProps
-			} = this.props;
-
-			const { component: MappedStyledComponent, filteredProps } = applyVariations(
-				Styled.Input,
-				Styled.variationMap,
-				inputProps,
-			);
-
-			return (
-				<MappedStyledComponent
-					type={type || 'text'}
-					autoFocus={autoFocus}
-					readOnly={readOnly}
-					disabled={disabled}
-					value={value || ''}
-					placeholder={placeholder || ''}
-					onChange={this.handleChange}
-					onClick={onClick}
-					onKeyPress={this.handleKeyPress}
-					ref={forwardedRef}
-					{...filteredProps || {}}
-				/>
-			);
+	handleChange = event => {
+		const { onChange } = this.props;
+		if (onChange) {
+			onChange(event);
 		}
-	},
-);
+	};
+
+	handleClick = event => {
+		const { onClick } = this.props;
+		if (onClick) {
+			onClick(event);
+		}
+	};
+
+	handleKeyPress = event => {
+		const { onKeyPress } = this.props;
+		if (onKeyPress) {
+			onKeyPress(event);
+		}
+	};
+
+	render() {
+		const { value, placeholder, type, onClick, size, ...inputProps } = this.props;
+
+		const ScaledInput = inputSize[size];
+		const extraProps = inputProps || {};
+
+		return (
+			<ScaledInput
+				type={type || 'text'}
+				value={value || ''}
+				placeholder={placeholder || ''}
+				onClick={this.handleClick}
+				onChange={this.handleChange}
+				onKeyPress={this.handleKeyPress}
+				{...extraProps}
+			/>
+		);
+	}
+}
+
+const StyledInput = styled.input`
+	${resetStyles};
+
+	border-radius: 3px;
+	border: 1px solid ${inputColors.inputBorderColor};
+
+	padding: ${thickness.eight};
+	height: 32px;
+	${fonts.ui16};
+
+	width: ${props => props.styleOverrides.width};
+
+	&:focus {
+		border-color: ${inputColors.inputFocusedBorderColor};
+		box-shadow: 0 0 0 2px ${inputColors.inputFocusedShadowColor};
+		outline: 0;
+	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
+
+	&:read-only {
+		background: ${colors.gray22};
+	}
+`;
+
+export const inputSize = {
+	small: styled(StyledInput)`
+		padding: ${thickness.eight};
+		height: 32px;
+		${fonts.ui16};
+	`,
+	medium: styled(StyledInput)`
+		padding: 12px;
+		height: 40px;
+		${fonts.ui16};
+	`,
+	large: styled(StyledInput)`
+		padding: 16px;
+		height: 46px;
+		${fonts.ui16};
+	`,
+};
