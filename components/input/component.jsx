@@ -30,6 +30,9 @@ export class Input extends PureComponent {
 	static defaultProps = {
 		styleOverrides: {},
 		size: Input.medium,
+		type: 'text',
+		value: '',
+		placeholder: '',
 	};
 
 	handleChange = event => {
@@ -54,20 +57,17 @@ export class Input extends PureComponent {
 	};
 
 	render() {
-		const { value, placeholder, type, onClick, size, ...inputProps } = this.props;
+		const { size, ...inputProps } = this.props;
 
 		const ScaledInput = inputSize[size];
-		const extraProps = inputProps || {};
+		const props = inputProps || {};
 
 		return (
 			<ScaledInput
-				type={type || 'text'}
-				value={value || ''}
-				placeholder={placeholder || ''}
 				onClick={this.handleClick}
 				onChange={this.handleChange}
 				onKeyPress={this.handleKeyPress}
-				{...extraProps}
+				{...props}
 			/>
 		);
 	}
