@@ -4,8 +4,31 @@ import styled from 'styled-components';
 import { resetStyles } from '../utils';
 import { thickness, fonts, inputColors, colors } from '../shared-styles';
 
+export { DeprecatedInput as Input };
+
+// Necessary for <Input large ...> backwards compatibility.
+DeprecatedInput.propTypes = {
+	small: PropTypes.bool,
+	medium: PropTypes.bool,
+	large: PropTypes.bool,
+};
+
+function DeprecatedInput(props) {
+	if (props.small) {
+		return <Input.Small {...props} />;
+	}
+	if (props.medium) {
+		return <Input.Medium {...props} />;
+	}
+	if (props.large) {
+		return <Input.Large {...props} />;
+	}
+
+	return <Input {...props} />;
+}
+
 /** Standard text input with no validation */
-export class Input extends PureComponent {
+class Input extends PureComponent {
 	static small = 'small';
 	static medium = 'medium';
 	static large = 'large';
@@ -100,7 +123,7 @@ const StyledInput = styled.input`
 	}
 `;
 
-export const inputSize = {
+const inputSize = {
 	small: styled(StyledInput)`
 		padding: ${thickness.eight};
 		height: 32px;
